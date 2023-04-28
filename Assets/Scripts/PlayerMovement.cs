@@ -7,13 +7,16 @@ public class PlayerMovement : MonoBehaviour
     Rigidbody rb;
     GameObject Maincamera;
 
-    float rollSpeed = 70f;
-    public float maxRollSpeed = 9f;
+    static float groundRollSpeed = 80f;
+    static float airRollSpeed = groundRollSpeed * 0.5f;
+    static float maxRollSpeed = 9f;
 
     float xAxis;
     float zAxis;
     Vector3 oldPosition = new Vector3();
     Vector3 cameraAxis;
+
+    public bool isGrounded = true;
 
 
     // Start is called before the first frame update
@@ -32,17 +35,23 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        MovementForce();
+        if (isGrounded)
+        {
+            MovementForce(groundRollSpeed);
+        }
+        else
+        {
+            MovementForce(airRollSpeed);
+        }
         //Geschwindigkeitsbegrenzer();
     }
 
-    void MovementForce()
+    void MovementForce(float rollSpeed)
     {
         xAxis = Input.GetAxis("Horizontal");
         //cameraAxis = Maincamera.transform.TransformDirection(1, 0, 1);
         zAxis = Input.GetAxis("Vertical");
         Vector3 newPosition = rb.position;
-        Debug.Log("x: " + Mathf.Abs(newPosition.x - oldPosition.x) + "   z: " + Mathf.Abs(newPosition.z - oldPosition.z));
 
 
         if (rb.velocity.x >= 0)
@@ -113,5 +122,17 @@ public class PlayerMovement : MonoBehaviour
     void Geschwindigkeitsbegrenzer()
     {
         rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxRollSpeed);
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        if (collision.gameObject.tag == "Ground")
+        {
+            isGrounded = true;
+        }
+        else
+        {
+            isGrounded = false;
+        }
     }
 }
